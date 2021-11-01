@@ -14,10 +14,12 @@ add_executable(picologanal)
 
 target_sources(picologanal PRIVATE
   main.cc
+  st7735.cc
 )
 
 target_link_libraries(picologanal PRIVATE
   pico_stdlib
+  hardware_spi
 )
 
 target_compile_options(picologanal PRIVATE -Wall -Wextra -Werror -Wno-ignored-qualifiers)
