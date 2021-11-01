@@ -12,6 +12,8 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 
 add_executable(picologanal)
 
+pico_generate_pio_header(picologanal ${CMAKE_CURRENT_SOURCE_DIR}/sampling.pio)
+
 target_sources(picologanal PRIVATE
   main.cc
   st7735.cc
@@ -20,6 +22,7 @@ target_sources(picologanal PRIVATE
 target_link_libraries(picologanal PRIVATE
   pico_stdlib
   hardware_spi
+  hardware_pio
 )
 
 target_compile_options(picologanal PRIVATE -Wall -Wextra -Werror -Wno-ignored-qualifiers)
