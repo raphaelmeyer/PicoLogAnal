@@ -4,7 +4,7 @@
 
 - start vscode
 - install recommended plugin
-- >< `Reopen in Container`
+- click on `><` and select `Reopen in Container`
 - configure & build
 - ...
 
