@@ -1,0 +1,19 @@
+{
+  "name": "Raspberry Pi Pico Toolchain",
+  "dockerComposeFile": "../toolchain/docker-compose.yml",
+  "service": "toolchain",
+  "workspaceFolder": "/source",
+  "remoteUser": "vscode",
+  "extensions": [
+    "ms-vscode.cmake-tools",
+    "ms-vscode.cpptools",
+    "twxs.cmake"
+  ],
+  "settings": {
+    "editor.renderWhitespace": "boundary",
+    "editor.tabSize": 2,
+    "editor.formatOnSave": true,
+    "editor.insertSpaces": true,
+    "C_Cpp.clang_format_style": "LLVM"
+  }
+}
