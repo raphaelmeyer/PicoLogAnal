@@ -20,9 +20,11 @@ target_sources(picologanal PRIVATE
 )
 
 target_link_libraries(picologanal PRIVATE
+  pico_multicore
   pico_stdlib
-  hardware_spi
+  hardware_adc
   hardware_pio
+  hardware_spi
 )
 
 target_compile_options(picologanal PRIVATE -Wall -Wextra -Werror -Wno-ignored-qualifiers)
