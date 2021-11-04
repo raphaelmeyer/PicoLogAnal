@@ -52,39 +52,35 @@ constexpr const uint8_t GMCTRP1 = 0xE0;
 constexpr const uint8_t GMCTRN1 = 0xE1;
 } // namespace
 
-St7735::St7735(spi_inst *spi_hw, uint clock_pin, uint mosi_pin,
-               uint chip_select_pin, uint data_command_pin, uint reset_pin)
-    : hw_{spi_hw}, clock_{clock_pin}, mosi_{mosi_pin},
-      chip_select_{chip_select_pin},
-      data_command_{data_command_pin}, reset_{reset_pin} {
+St7735::St7735(Config::Display const &config) : config_{config} {
 
   gpio_init(PICO_DEFAULT_LED_PIN);
   gpio_set_dir(PICO_DEFAULT_LED_PIN, GPIO_OUT);
 
-  spi_init(hw_, 500 * 1000);
-  gpio_set_function(mosi_, GPIO_FUNC_SPI);
-  gpio_set_function(clock_, GPIO_FUNC_SPI);
+  spi_init(config_.spi, 500 * 1000);
+  gpio_set_function(config_.mosi, GPIO_FUNC_SPI);
+  gpio_set_function(config_.clock, GPIO_FUNC_SPI);
 
-  gpio_init(chip_select_);
-  gpio_set_dir(chip_select_, GPIO_OUT);
-  gpio_put(chip_select_, true);
+  gpio_init(config_.chip_select);
+  gpio_set_dir(config_.chip_select, GPIO_OUT);
+  gpio_put(config_.chip_select, true);
 
-  gpio_init(data_command_);
-  gpio_set_dir(data_command_, GPIO_OUT);
+  gpio_init(config_.data_command);
+  gpio_set_dir(config_.data_command, GPIO_OUT);
 
-  gpio_init(reset_);
-  gpio_set_dir(reset_, GPIO_OUT);
+  gpio_init(config_.reset);
+  gpio_set_dir(config_.reset, GPIO_OUT);
 
   // initialize
-  gpio_put(chip_select_, false);
-  gpio_put(reset_, true);
-  gpio_put(data_command_, true);
+  gpio_put(config_.chip_select, false);
+  gpio_put(config_.reset, true);
+  gpio_put(config_.data_command, true);
   sleep_ms(200);
 
-  gpio_put(reset_, false);
+  gpio_put(config_.reset, false);
   sleep_ms(200);
 
-  gpio_put(reset_, true);
+  gpio_put(config_.reset, true);
   sleep_ms(200);
 
   write_command(SWRESET);
@@ -124,8 +120,6 @@ St7735::St7735(spi_inst *spi_hw, uint clock_pin, uint mosi_pin,
 
   write_command(DISPON);
   sleep_ms(100);
-
-  clear_screen(0x0000);
 }
 
 void St7735::set_window(uint8_t x, uint8_t y, uint8_t width, uint8_t height) {
@@ -137,14 +131,14 @@ void St7735::set_window(uint8_t x, uint8_t y, uint8_t width, uint8_t height) {
 }
 
 void St7735::colorize_next_pixel(uint16_t color) {
-  gpio_put(chip_select_, false);
-  gpio_put(data_command_, true);
+  gpio_put(config_.chip_select, false);
+  gpio_put(config_.data_command, true);
 
   uint8_t const value[2]{static_cast<uint8_t>(color >> 8),
                          static_cast<uint8_t>(color & 0xFF)};
-  spi_write_blocking(hw_, value, 2);
+  spi_write_blocking(config_.spi, value, 2);
 
-  gpio_put(chip_select_, true);
+  gpio_put(config_.chip_select, true);
 }
 
 void St7735::clear_screen(uint16_t color) {
@@ -155,26 +149,26 @@ void St7735::clear_screen(uint16_t color) {
 }
 
 void St7735::write_command(uint8_t command) {
-  gpio_put(chip_select_, false);
-  gpio_put(data_command_, false);
+  gpio_put(config_.chip_select, false);
+  gpio_put(config_.data_command, false);
 
-  spi_write_blocking(hw_, &command, 1);
+  spi_write_blocking(config_.spi, &command, 1);
 
-  gpio_put(chip_select_, true);
+  gpio_put(config_.chip_select, true);
 }
 
 void St7735::write_command(uint8_t command,
                            std::initializer_list<uint8_t> const &data) {
-  gpio_put(chip_select_, false);
-  gpio_put(data_command_, false);
+  gpio_put(config_.chip_select, false);
+  gpio_put(config_.data_command, false);
 
-  spi_write_blocking(hw_, &command, 1);
+  spi_write_blocking(config_.spi, &command, 1);
 
-  gpio_put(data_command_, true);
+  gpio_put(config_.data_command, true);
 
   for (auto const value : data) {
-    spi_write_blocking(hw_, &value, 1);
+    spi_write_blocking(config_.spi, &value, 1);
   }
 
-  gpio_put(chip_select_, true);
+  gpio_put(config_.chip_select, true);
 }
