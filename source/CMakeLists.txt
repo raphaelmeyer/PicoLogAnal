@@ -28,6 +28,8 @@ target_link_libraries(picologanal PRIVATE
   hardware_dma
   hardware_pio
   hardware_spi
+
+  hardware_pwm
 )
 
 target_compile_options(picologanal PRIVATE -Wall -Wextra -Werror -Wno-ignored-qualifiers)

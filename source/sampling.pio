@@ -1,23 +1,26 @@
 .program sampling
 
+    wait 0 pin 0
+    wait 1 pin 0
+
+.wrap_target
+
     in pins, 2
+
+.wrap
 
 % c-sdk {
 
-void sampling_program_init(PIO pio, uint sm, uint offset, uint base_pin, float div) {
-  pio_sm_config sm_config = sampling_program_get_default_config(offset);
-
-  sm_config_set_in_pins(&sm_config, base_pin);
+void sampling_program_init(PIO pio, uint sm, pio_sm_config * config, uint base_pin, float div) {
+  sm_config_set_in_pins(config, base_pin);
   pio_sm_set_consecutive_pindirs(pio, sm, base_pin, 2, false);
 
   pio_gpio_init(pio, base_pin);
   pio_gpio_init(pio, base_pin + 1);
 
-  sm_config_set_in_shift(&sm_config, false, true, 2);
-  sm_config_set_clkdiv(&sm_config, div);
-  sm_config_set_fifo_join(&sm_config, PIO_FIFO_JOIN_RX);
-
-  pio_sm_init(pio, sm, offset, &sm_config);
+  sm_config_set_in_shift(config, false, true, 2);
+  sm_config_set_clkdiv(config, div);
+  sm_config_set_fifo_join(config, PIO_FIFO_JOIN_RX);
 }
 
 %}

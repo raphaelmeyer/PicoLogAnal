@@ -10,6 +10,8 @@
 #include <hardware/spi.h>
 #include <pico/multicore.h>
 
+#include <hardware/pwm.h>
+
 #include <array>
 
 void main_other_core() {
@@ -39,6 +41,8 @@ PicoLogicalAnalyser::PicoLogicalAnalyser(Config const &config)
 
 void PicoLogicalAnalyser::start() {
 
+  auto const system_clock_hz = clock_get_hz(clk_sys);
+
   adc_init();
   adc_gpio_init(config_.control.scaler);
   multicore_launch_core1(main_other_core);
@@ -50,10 +54,38 @@ void PicoLogicalAnalyser::start() {
 
   auto const offset = pio_add_program(config_.input.pio, &sampling_program);
   auto const sm = pio_claim_unused_sm(config_.input.pio, true);
-  auto const div = clock_get_hz(clk_sys) / 1'000'000.0f;
+  auto const div = system_clock_hz / 1'000'000.0f;
 
-  sampling_program_init(config_.input.pio, sm, offset, config_.input.probe_base,
-                        div);
+  auto sm_config = sampling_program_get_default_config(offset);
+  sampling_program_init(config_.input.pio, sm, &sm_config,
+                        config_.input.probe_base, div);
+
+  // ----------------------------------
+  // auto test signal
+  uint const autotest_a = 0;
+  uint const autotest_b = 2;
+
+  auto const slice_a = pwm_gpio_to_slice_num(autotest_a);
+  auto const slice_b = pwm_gpio_to_slice_num(autotest_b);
+  auto const channel_a = pwm_gpio_to_channel(autotest_a);
+  auto const channel_b = pwm_gpio_to_channel(autotest_b);
+
+  auto pwm_config = pwm_get_default_config();
+  pwm_config_set_clkdiv(&pwm_config, system_clock_hz / 250'000.0f);
+  pwm_config_set_wrap(&pwm_config, 10);
+
+  pwm_init(slice_a, &pwm_config, false);
+  pwm_init(slice_b, &pwm_config, false);
+
+  pwm_set_chan_level(slice_a, channel_a, 4);
+  pwm_set_chan_level(slice_b, channel_b, 7);
+
+  gpio_set_function(autotest_a, GPIO_FUNC_PWM);
+  gpio_set_function(autotest_b, GPIO_FUNC_PWM);
+
+  pwm_set_enabled(slice_a, true);
+  pwm_set_enabled(slice_b, true);
+  // ----------------------------------
 
   auto dma_channel = dma_claim_unused_channel(true);
   auto dma_config = dma_channel_get_default_config(dma_channel);
@@ -67,9 +99,7 @@ void PicoLogicalAnalyser::start() {
   // sampling rate ? change PIO clock divider ?
 
   for (;;) {
-    pio_sm_set_enabled(config_.input.pio, sm, false);
-    pio_sm_clear_fifos(config_.input.pio, sm);
-    pio_sm_restart(config_.input.pio, sm);
+    pio_sm_init(config_.input.pio, sm, offset, &sm_config);
 
     dma_channel_configure(dma_channel, &dma_config, capture_buffer.data(),
                           &config_.input.pio->rxf[sm], capture_buffer.size(),
@@ -79,6 +109,7 @@ void PicoLogicalAnalyser::start() {
 
     pio_sm_set_enabled(config_.input.pio, sm, true);
     dma_channel_wait_for_finish_blocking(dma_channel);
+    pio_sm_set_enabled(config_.input.pio, sm, false);
 
     display.draw_signals(capture_buffer);
 
