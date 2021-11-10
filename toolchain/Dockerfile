@@ -16,11 +16,11 @@ RUN apt-get update && export DEBIAN_FRONTEND=noninteractive && \
 
 RUN git clone https://github.com/raspberrypi/pico-sdk.git /pico-sdk \
     && cd /pico-sdk \
-    && git switch -c noxious/1.2.0 1.2.0 \
+    && git switch -c raphaelmeyer/1.2.0 1.2.0 \
     && git submodule update --init
 
 ENV PICO_SDK_PATH /pico-sdk
 
-RUN mkdir /build && chown ${REMOTE_USER}:${REMOTE_USER} /build
+RUN mkdir /build
 
 VOLUME [ "/build" ]

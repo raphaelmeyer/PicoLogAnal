@@ -1,9 +1,11 @@
 {
   "name": "Raspberry Pi Pico Toolchain",
-  "dockerComposeFile": "../toolchain/docker-compose.yml",
-  "service": "toolchain",
+  "build": {
+    "context": "../",
+    "dockerfile": "../toolchain/Dockerfile"
+  },
+  "workspaceMount": "source=${localWorkspaceFolder}/source,target=/source,type=bind,consistency=cached",
   "workspaceFolder": "/source",
-  "remoteUser": "vscode",
   "extensions": [
     "ms-vscode.cmake-tools",
     "ms-vscode.cpptools",
