@@ -19,6 +19,8 @@ target_sources(picologanal PRIVATE
   display.cc
   pico_log_anal.cc
   st7735.cc
+
+  test_signal.cc
 )
 
 target_link_libraries(picologanal PRIVATE

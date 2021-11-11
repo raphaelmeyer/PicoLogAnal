@@ -29,7 +29,14 @@ struct Config {
     uint const scaler;
   };
 
+  struct AutoTest {
+    uint const output_a;
+    uint const output_b;
+  };
+
   Display display;
   Input input;
   Control control;
+
+  AutoTest test;
 };

@@ -1,6 +1,7 @@
 #include "pico_log_anal.h"
 
 #include "display.h"
+#include "test_signal.h"
 
 #include "sampling.pio.h"
 
@@ -9,8 +10,6 @@
 #include <hardware/dma.h>
 #include <hardware/spi.h>
 #include <pico/multicore.h>
-
-#include <hardware/pwm.h>
 
 #include <array>
 
@@ -42,6 +41,8 @@ void PicoLogicalAnalyser::start() {
 
   auto const system_clock_hz = clock_get_hz(clk_sys);
 
+  TestSignal test_signal{config_.test};
+
   adc_init();
   adc_gpio_init(config_.control.scaler);
   multicore_launch_core1(main_other_core);
@@ -57,37 +58,7 @@ void PicoLogicalAnalyser::start() {
   sampling_program_init(config_.input.pio, sm, &sm_config,
                         config_.input.probe_base);
 
-  // ----------------------------------
-  // auto test signal
-  uint const autotest_a = 0;
-  uint const autotest_b = 1;
-
-  auto const slice_a = pwm_gpio_to_slice_num(autotest_a);
-  auto const slice_b = pwm_gpio_to_slice_num(autotest_b);
-
-  auto const channel_a = pwm_gpio_to_channel(autotest_a);
-  auto const channel_b = pwm_gpio_to_channel(autotest_b);
-
-  auto pwm_config = pwm_get_default_config();
-  pwm_config_set_clkdiv(&pwm_config, system_clock_hz / 1'000'000.0f);
-  pwm_config_set_wrap(&pwm_config, 31);
-
-  pwm_init(slice_a, &pwm_config, false);
-  if (slice_a != slice_b) {
-    pwm_init(slice_b, &pwm_config, false);
-  }
-
-  pwm_set_chan_level(slice_a, channel_a, 8);
-  pwm_set_chan_level(slice_b, channel_b, 16);
-
-  gpio_set_function(autotest_a, GPIO_FUNC_PWM);
-  gpio_set_function(autotest_b, GPIO_FUNC_PWM);
-
-  pwm_set_enabled(slice_a, true);
-  if (slice_a != slice_b) {
-    pwm_set_enabled(slice_b, true);
-  }
-  // ----------------------------------
+  test_signal.start();
 
   auto dma_channel = dma_claim_unused_channel(true);
   auto dma_config = dma_channel_get_default_config(dma_channel);
@@ -97,8 +68,6 @@ void PicoLogicalAnalyser::start() {
                           pio_get_dreq(config_.input.pio, sm, false));
 
   Buffer capture_buffer{};
-
-  // sampling rate ? change PIO clock divider ?
 
   for (;;) {
     auto const div =
