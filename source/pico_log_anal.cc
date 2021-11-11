@@ -63,28 +63,33 @@ void PicoLogicalAnalyser::start() {
   // ----------------------------------
   // auto test signal
   uint const autotest_a = 0;
-  uint const autotest_b = 2;
+  uint const autotest_b = 1;
 
   auto const slice_a = pwm_gpio_to_slice_num(autotest_a);
   auto const slice_b = pwm_gpio_to_slice_num(autotest_b);
+
   auto const channel_a = pwm_gpio_to_channel(autotest_a);
   auto const channel_b = pwm_gpio_to_channel(autotest_b);
 
   auto pwm_config = pwm_get_default_config();
   pwm_config_set_clkdiv(&pwm_config, system_clock_hz / 250'000.0f);
-  pwm_config_set_wrap(&pwm_config, 10);
+  pwm_config_set_wrap(&pwm_config, 16);
 
   pwm_init(slice_a, &pwm_config, false);
-  pwm_init(slice_b, &pwm_config, false);
+  if (slice_a != slice_b) {
+    pwm_init(slice_b, &pwm_config, false);
+  }
 
   pwm_set_chan_level(slice_a, channel_a, 4);
-  pwm_set_chan_level(slice_b, channel_b, 7);
+  pwm_set_chan_level(slice_b, channel_b, 8);
 
   gpio_set_function(autotest_a, GPIO_FUNC_PWM);
   gpio_set_function(autotest_b, GPIO_FUNC_PWM);
 
   pwm_set_enabled(slice_a, true);
-  pwm_set_enabled(slice_b, true);
+  if (slice_a != slice_b) {
+    pwm_set_enabled(slice_b, true);
+  }
   // ----------------------------------
 
   auto dma_channel = dma_claim_unused_channel(true);
