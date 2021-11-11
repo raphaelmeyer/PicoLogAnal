@@ -7,8 +7,9 @@ public:
   Display(Config::Display const &config);
 
   void draw_signals(Buffer const &data);
+  void draw_rate(uint32_t rate);
 
-  constexpr static uint16_t rbg(uint8_t r, uint8_t g, uint8_t b) {
+  constexpr static uint16_t rgb(uint8_t r, uint8_t g, uint8_t b) {
     return (r & 0x1f) << 11 | (g & 0x3f) << 5 | (b & 0x1f);
   }
 

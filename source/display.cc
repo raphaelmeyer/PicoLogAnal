@@ -39,3 +39,18 @@ void Display::draw_signals(Buffer const &data) {
     }
   }
 }
+
+void Display::draw_rate(uint32_t rate) {
+  lcd_.set_window(8, 100, 10, 21);
+  for (uint i = 0; i <= 20; ++i) {
+    for (uint j = 0; j < 10; ++j) {
+      if ((i == 0 || i == 20) && (j % 3 == 0)) {
+        lcd_.colorize_next_pixel(rgb(0x10, 0x20, 0x10));
+      } else if (i == rate) {
+        lcd_.colorize_next_pixel(rgb(0x1f, 0x20, 0x00));
+      } else {
+        lcd_.colorize_next_pixel(0x0000);
+      }
+    }
+  }
+}
