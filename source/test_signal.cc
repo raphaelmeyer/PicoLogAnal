@@ -14,7 +14,7 @@ void TestSignal::start() const {
   auto const channel_b = pwm_gpio_to_channel(config_.output_b);
 
   auto pwm_config = pwm_get_default_config();
-  pwm_config_set_clkdiv(&pwm_config, clock_get_hz(clk_sys) / 1'000'000.0f);
+  pwm_config_set_clkdiv_int(&pwm_config, 125);
   pwm_config_set_wrap(&pwm_config, 31);
 
   pwm_init(slice_a, &pwm_config, false);

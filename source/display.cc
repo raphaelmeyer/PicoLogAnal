@@ -1,5 +1,7 @@
 #include "display.h"
 
+#include "font.h"
+
 Display::Display(Config::Display const &config) : lcd_{config} {
   lcd_.clear_screen(0x0000);
 }
@@ -41,16 +43,36 @@ void Display::draw_signals(Buffer const &data) {
 }
 
 void Display::draw_rate(uint32_t rate) {
-  lcd_.set_window(8, 100, 10, 21);
-  for (uint i = 0; i <= 20; ++i) {
-    for (uint j = 0; j < 10; ++j) {
-      if ((i == 0 || i == 20) && (j % 3 == 0)) {
-        lcd_.colorize_next_pixel(rgb(0x10, 0x20, 0x10));
-      } else if (i == rate) {
-        lcd_.colorize_next_pixel(rgb(0x1f, 0x20, 0x00));
+
+  uint x = 100;
+  uint y = 110;
+
+  do {
+    lcd_.set_window(x, y, 4, 5);
+
+    auto glyph = Font::number_as_bitmap(rate % 10);
+    for (uint i = 0; i < 20; ++i) {
+      if (glyph & 1) {
+        lcd_.colorize_next_pixel(0xffff);
       } else {
         lcd_.colorize_next_pixel(0x0000);
       }
+      glyph >>= 1;
     }
+
+    rate /= 10;
+    x -= 5;
+  } while (rate > 0);
+
+  while (x > 50) {
+    lcd_.set_window(x, y, 4, 5);
+
+    for (uint i = 0; i < 16; ++i) {
+      lcd_.colorize_next_pixel(0x0000);
+    }
+    for (uint i = 0; i < 4; ++i) {
+      lcd_.colorize_next_pixel(rgb(0x10, 0x20, 0x10));
+    }
+    x -= 5;
   }
 }

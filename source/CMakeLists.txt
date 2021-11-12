@@ -19,6 +19,7 @@ target_sources(picologanal PRIVATE
   display.cc
   pico_log_anal.cc
   st7735.cc
+  font.cc
 
   test_signal.cc
 )

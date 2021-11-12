@@ -22,9 +22,8 @@ void main_other_core() {
   for (;;) {
     auto const raw_value = adc_read();
 
-    // 12bit value, scaled and cropped into range 0 .. 20
-    uint32_t const scaled = std::max(std::min(raw_value / 150, 23), 3) - 3;
-    uint32_t const sampling_interval = scaled;
+    uint32_t const sampling_interval =
+        std::max(2, std::min(raw_value / 170, 22)) - 2;
 
     if (sampling_interval != prev_interval) {
       multicore_fifo_push_blocking(sampling_interval);
@@ -39,7 +38,7 @@ PicoLogicalAnalyser::PicoLogicalAnalyser(Config const &config)
 
 void PicoLogicalAnalyser::start() {
 
-  auto const system_clock_hz = clock_get_hz(clk_sys);
+  // auto const system_clock_hz = clock_get_hz(clk_sys);
 
   TestSignal test_signal{config_.test};
 
@@ -70,9 +69,9 @@ void PicoLogicalAnalyser::start() {
   Buffer capture_buffer{};
 
   for (;;) {
-    auto const div =
-        system_clock_hz / static_cast<float>(1 << sampling_interval);
-    sm_config_set_clkdiv(&sm_config, div);
+    auto const div = 125;
+
+    sm_config_set_clkdiv_int_frac(&sm_config, div, 0);
 
     pio_sm_init(config_.input.pio, sm, offset, &sm_config);
 
