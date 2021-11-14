@@ -10,4 +10,5 @@ public:
 
 private:
   Config const config_;
+  Buffer capture_buffer_{};
 };

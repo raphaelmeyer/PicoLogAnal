@@ -16,11 +16,12 @@ pico_generate_pio_header(picologanal ${CMAKE_CURRENT_SOURCE_DIR}/sampling.pio)
 
 target_sources(picologanal PRIVATE
   main.cc
+  capture.cc
   display.cc
+  error.cc
+  font.cc
   pico_log_anal.cc
   st7735.cc
-  font.cc
-
   test_signal.cc
 )
 

@@ -1,3 +1,4 @@
+#include "error.h"
 #include "pico_log_anal.h"
 
 #include <hardware/pio.h>
@@ -13,11 +14,13 @@ Config const config{
                 .reset = 21,
                 .spi = spi0},
     .input = {.probe_base = 14, .pio = pio0},
-    .control = {.scaler = 26},
-    .test = {.output_a = 0, .output_b = 1}
+    .control = {.left = 6, .right = 7},
+    .test = {.output_a = 0, .output_b = 1},
+    .error = {.light = 22}
 
 };
 
+Error error{config.error};
 PicoLogicalAnalyser logical_analylser{config};
 
 } // namespace

@@ -50,11 +50,11 @@ constexpr auto const font = encode(
         0b1111  //
     },
     Glyph{
-        0b1111, //
+        0b1110, //
         0b0001, //
-        0b0111, //
+        0b0110, //
         0b0001, //
-        0b1111  //
+        0b1110  //
     },
     Glyph{
         0b1000, //
@@ -71,11 +71,11 @@ constexpr auto const font = encode(
         0b1110  //
     },
     Glyph{
+        0b0100, //
         0b1000, //
-        0b1000, //
-        0b1111, //
+        0b1110, //
         0b1001, //
-        0b1111  //
+        0b0110  //
     },
     Glyph{
         0b1111, //
@@ -92,11 +92,11 @@ constexpr auto const font = encode(
         0b0110  //
     },
     Glyph{
-        0b1111, //
+        0b0110, //
         0b1001, //
-        0b1111, //
+        0b0111, //
         0b0001, //
-        0b0001  //
+        0b0010  //
     }
 
 );

@@ -26,7 +26,8 @@ struct Config {
   };
 
   struct Control {
-    uint const scaler;
+    uint const left;
+    uint const right;
   };
 
   struct AutoTest {
@@ -34,9 +35,13 @@ struct Config {
     uint const output_b;
   };
 
+  struct Error {
+    uint const light;
+  };
+
   Display display;
   Input input;
   Control control;
-
   AutoTest test;
+  Error error;
 };
