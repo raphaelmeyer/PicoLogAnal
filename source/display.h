@@ -14,6 +14,8 @@ public:
   }
 
 private:
+  void draw_glyph(uint x, uint y, uint32_t glyph, uint16_t color);
+
   constexpr static uint const channels = 2;
 
   uint const signal_height = 10;

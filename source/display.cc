@@ -44,35 +44,31 @@ void Display::draw_signals(Buffer const &data) {
 
 void Display::draw_rate(uint32_t rate) {
 
-  uint x = 100;
-  uint y = 110;
+  uint x = 110;
+  uint const y = 115;
+
+  draw_glyph(x, y, Font::char_as_bitmap('z'), rgb(0x10, 0x20, 0x1f));
+  x -= 5;
+
+  draw_glyph(x, y, Font::char_as_bitmap('H'), rgb(0x10, 0x20, 0x1f));
+  x -= 6;
 
   do {
-    lcd_.set_window(x, y, 4, 5);
-
-    auto glyph = Font::number_as_bitmap(rate % 10);
-    for (uint i = 0; i < 20; ++i) {
-      if (glyph & 1) {
-        lcd_.colorize_next_pixel(0xffff);
-      } else {
-        lcd_.colorize_next_pixel(0x0000);
-      }
-      glyph >>= 1;
-    }
-
+    draw_glyph(x, y, Font::number_as_bitmap(rate % 10), 0xffff);
     rate /= 10;
     x -= 5;
   } while (rate > 0);
+}
 
-  while (x > 50) {
-    lcd_.set_window(x, y, 4, 5);
+void Display::draw_glyph(uint x, uint y, uint32_t glyph, uint16_t color) {
+  lcd_.set_window(x, y, 4, 5);
 
-    for (uint i = 0; i < 16; ++i) {
+  for (uint i = 0; i < 20; ++i) {
+    if (glyph & 1) {
+      lcd_.colorize_next_pixel(color);
+    } else {
       lcd_.colorize_next_pixel(0x0000);
     }
-    for (uint i = 0; i < 4; ++i) {
-      lcd_.colorize_next_pixel(rgb(0x10, 0x20, 0x10));
-    }
-    x -= 5;
+    glyph >>= 1;
   }
 }

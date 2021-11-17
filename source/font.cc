@@ -97,6 +97,21 @@ constexpr auto const font = encode(
         0b0111, //
         0b0001, //
         0b0010  //
+    },
+
+    Glyph{
+        0b1001, //
+        0b1001, //
+        0b1111, //
+        0b1001, //
+        0b1001  //
+    },
+    Glyph{
+        0b0000, //
+        0b1111, //
+        0b0010, //
+        0b0100, //
+        0b1111  //
     }
 
 );
@@ -110,6 +125,19 @@ uint32_t number_as_bitmap(uint value) {
     return font[value];
   }
   return 0;
+}
+
+uint32_t char_as_bitmap(char character) {
+  switch (character) {
+  case 'H':
+    return font[10];
+
+  case 'z':
+    return font[11];
+
+  default:
+    return 0;
+  }
 }
 
 } // namespace Font

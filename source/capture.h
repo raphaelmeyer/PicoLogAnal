@@ -2,21 +2,20 @@
 
 #include "hw_config.h"
 
-#include <memory>
+#include <pico/sem.h>
+#include <pico/util/queue.h>
 
 class Capture {
 public:
-  Capture(Config::Input config, Buffer &capture_buffer);
+  enum class Result { Error, Ready };
 
-  static void initialize(std::unique_ptr<Capture> self);
+  Capture(Config::Input config);
 
-  enum class Result : uint32_t { Error, Ok };
+  void arm();
+  Result trigger(uint sampling_rate_hz, Buffer &capture_buffer);
 
 private:
-  void idle();
   Config::Input const config_;
-  Buffer &capture_buffer_;
-
-  void static capture_main();
-  static std::unique_ptr<Capture> self_;
+  queue_t trigger_queue_{};
+  semaphore_t done_{};
 };

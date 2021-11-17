@@ -16,29 +16,22 @@ void PicoLogicalAnalyser::start() {
 
   TestSignal test_signal{config_.test};
   Display display{config_.display};
+  Capture capture{config_.input};
 
   test_signal.start();
-
-  Capture::initialize(
-      std::make_unique<Capture>(config_.input, capture_buffer_));
+  capture.arm();
 
   for (;;) {
     auto const next_sampling_time = make_timeout_time_ms(500);
 
-    if (not multicore_fifo_push_timeout_us(1'000'000, 5'000'000)) {
-      Error::show();
-    }
+    uint const sampling_rate_hz = 1'000'000;
+    auto const result = capture.trigger(sampling_rate_hz, capture_buffer_);
 
-    uint32_t result{};
-    if (not multicore_fifo_pop_timeout_us(5'000'000, &result)) {
-      Error::show();
-    }
-
-    if (static_cast<Capture::Result>(result) == Capture::Result::Ok) {
+    if (result == Capture::Result::Ready) {
       display.draw_signals(capture_buffer_);
     }
 
-    display.draw_rate(1234567890);
+    display.draw_rate(sampling_rate_hz);
 
     sleep_until(next_sampling_time);
   }

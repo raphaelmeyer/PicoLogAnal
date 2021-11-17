@@ -6,7 +6,7 @@ std::optional<uint> Error::light_ = std::nullopt;
 
 Error::Error(Config::Error config) { light_ = config.light; }
 
-void Error::show() {
+void Error::fail() {
   uint pin = PICO_DEFAULT_LED_PIN;
   if (light_) {
     pin = *light_;
@@ -19,5 +19,11 @@ void Error::show() {
     sleep_ms(250);
     gpio_put(pin, false);
     sleep_ms(250);
+  }
+}
+
+void Error::require(bool condition) {
+  if (not condition) {
+    fail();
   }
 }
