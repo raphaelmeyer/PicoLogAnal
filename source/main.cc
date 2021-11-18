@@ -21,8 +21,8 @@ Config const config{
 };
 
 Error error{config.error};
-PicoLogicalAnalyser logical_analylser{config};
+PicoLogicAnalyzer logic_analyzer{config};
 
 } // namespace
 
-int main() { logical_analylser.start(); }
+int main() { logic_analyzer.start(); }

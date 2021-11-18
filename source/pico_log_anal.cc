@@ -19,10 +19,9 @@ constexpr std::array const sampling_rate_hz{
 
 } // namespace
 
-PicoLogicalAnalyser::PicoLogicalAnalyser(Config const &config)
-    : config_{config} {}
+PicoLogicAnalyzer::PicoLogicAnalyzer(Config const &config) : config_{config} {}
 
-void PicoLogicalAnalyser::start() {
+void PicoLogicAnalyzer::start() {
   queue_init(&events_, sizeof(Event), 16);
   auto alarms = alarm_pool_get_default();
 
@@ -61,7 +60,7 @@ void PicoLogicalAnalyser::start() {
       case Event::DataReady: {
         display.draw_signals(capture_buffer_);
         auto const id = alarm_pool_add_alarm_at(
-            alarms, next_sampling_time, &PicoLogicalAnalyser::trigger_capture,
+            alarms, next_sampling_time, &PicoLogicAnalyzer::trigger_capture,
             this, true);
         Error::require(id >= 0);
       } break;
@@ -80,14 +79,14 @@ void PicoLogicalAnalyser::start() {
   }
 }
 
-bool PicoLogicalAnalyser::schedule_event(Event event) {
+bool PicoLogicAnalyzer::schedule_event(Event event) {
   return queue_try_add(&events_, &event);
 }
 
-int64_t PicoLogicalAnalyser::trigger_capture([[maybe_unused]] alarm_id_t id,
-                                             void *user_data) {
+int64_t PicoLogicAnalyzer::trigger_capture([[maybe_unused]] alarm_id_t id,
+                                           void *user_data) {
   if (user_data) {
-    auto self = static_cast<PicoLogicalAnalyser *>(user_data);
+    auto self = static_cast<PicoLogicAnalyzer *>(user_data);
     if (not self->schedule_event(Event::TriggerCapture)) {
       return 1000;
     }

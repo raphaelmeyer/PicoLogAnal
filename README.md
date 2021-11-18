@@ -1,4 +1,4 @@
-# Raspberry Pi Pico Logical Analyzer
+# Raspberry Pi Pico Logic Analyzer
 
 ## Getting started
 

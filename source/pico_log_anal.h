@@ -5,9 +5,9 @@
 
 #include <pico/util/queue.h>
 
-class PicoLogicalAnalyser {
+class PicoLogicAnalyzer {
 public:
-  PicoLogicalAnalyser(Config const &config);
+  PicoLogicAnalyzer(Config const &config);
 
   void start();
 
