@@ -7,12 +7,12 @@
 
 class Capture {
 public:
-  enum class Result { Error, Ready };
-
   Capture(Config::Input config);
 
   void arm();
-  Result trigger(uint sampling_rate_hz, Buffer &capture_buffer);
+  void trigger(uint sampling_rate_hz, Buffer &capture_buffer);
+
+  bool done();
 
 private:
   Config::Input const config_;

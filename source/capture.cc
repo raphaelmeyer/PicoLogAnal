@@ -38,25 +38,26 @@ Capture::Capture(Config::Input config) : config_{config} {}
 
 void Capture::arm() {
   queue_init(&trigger_queue_, sizeof(Trigger), 1);
-  sem_init(&done_, 0, 1);
+  sem_init(&done_, 1, 1);
 
   program = std::make_unique<PioProgram>(config_, &trigger_queue_, &done_);
 
   multicore_launch_core1(&PioProgram::main);
 }
 
-Capture::Result Capture::trigger(uint sampling_rate_hz,
-                                 Buffer &capture_buffer) {
-  sem_reset(&done_, 1);
-
+void Capture::trigger(uint sampling_rate_hz, Buffer &capture_buffer) {
   Trigger const trigger{sampling_rate_hz, &capture_buffer};
   if (not queue_try_add(&trigger_queue_, &trigger)) {
-    return Result::Error;
+    Error::fail();
   }
+}
 
-  sem_acquire_blocking(&done_);
-
-  return Result::Ready;
+bool Capture::done() {
+  if (sem_available(&done_)) {
+    sem_acquire_blocking(&done_);
+    return true;
+  }
+  return false;
 }
 
 PioProgram::PioProgram(Config::Input config, queue_t *trigger_queue,

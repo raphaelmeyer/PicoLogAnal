@@ -58,6 +58,14 @@ void Display::draw_rate(uint32_t rate) {
     rate /= 10;
     x -= 5;
   } while (rate > 0);
+
+  while (x > 55) {
+    lcd_.set_window(x, y, 4, 5);
+    for (uint i = 0; i < 20; ++i) {
+      lcd_.colorize_next_pixel(0x0000);
+    }
+    x -= 5;
+  }
 }
 
 void Display::draw_glyph(uint x, uint y, uint32_t glyph, uint16_t color) {

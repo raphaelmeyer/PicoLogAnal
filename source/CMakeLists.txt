@@ -17,6 +17,7 @@ pico_generate_pio_header(picologanal ${CMAKE_CURRENT_SOURCE_DIR}/sampling.pio)
 target_sources(picologanal PRIVATE
   main.cc
   capture.cc
+  control.cc
   display.cc
   error.cc
   font.cc
@@ -30,10 +31,10 @@ target_link_libraries(picologanal PRIVATE
   pico_stdlib
   hardware_adc
   hardware_dma
+  hardware_irq
   hardware_pio
-  hardware_spi
-
   hardware_pwm
+  hardware_spi
 )
 
 target_compile_options(picologanal PRIVATE -Wall -Wextra -Werror -Wno-ignored-qualifiers)
