@@ -1,6 +1,7 @@
 #include "capture.h"
 
 #include "error.h"
+#include "events.h"
 
 #include "sampling.pio.h"
 
@@ -18,14 +19,14 @@ struct Trigger {
 
 class PioProgram {
 public:
-  PioProgram(Config::Input config, queue_t *trigger_queue, semaphore_t *done);
+  PioProgram(Config::Input config, queue_t *trigger_queue, queue_t *events);
 
   void static main();
 
 private:
   Config::Input const config_;
   queue_t *trigger_queue_;
-  semaphore_t *done_;
+  queue_t *events_;
 
   void idle();
 };
@@ -34,13 +35,13 @@ std::unique_ptr<PioProgram> program{nullptr};
 
 } // namespace
 
-Capture::Capture(Config::Input config) : config_{config} {}
+Capture::Capture(Config::Input config, queue_t *events)
+    : config_{config}, events_{events} {}
 
 void Capture::arm() {
   queue_init(&trigger_queue_, sizeof(Trigger), 1);
-  sem_init(&done_, 1, 1);
 
-  program = std::make_unique<PioProgram>(config_, &trigger_queue_, &done_);
+  program = std::make_unique<PioProgram>(config_, &trigger_queue_, events_);
 
   multicore_launch_core1(&PioProgram::main);
 }
@@ -52,17 +53,9 @@ void Capture::trigger(uint sampling_rate_hz, Buffer &capture_buffer) {
   }
 }
 
-bool Capture::done() {
-  if (sem_available(&done_)) {
-    sem_acquire_blocking(&done_);
-    return true;
-  }
-  return false;
-}
-
 PioProgram::PioProgram(Config::Input config, queue_t *trigger_queue,
-                       semaphore_t *done)
-    : config_{config}, trigger_queue_{trigger_queue}, done_{done} {}
+                       queue_t *events)
+    : config_{config}, trigger_queue_{trigger_queue}, events_{events} {}
 
 void PioProgram::main() {
   Error::require(program != nullptr);
@@ -105,6 +98,7 @@ void PioProgram::idle() {
     dma_channel_wait_for_finish_blocking(dma_channel);
     pio_sm_set_enabled(config_.pio, sm, false);
 
-    sem_release(done_);
+    auto const data_ready = Event::DataReady;
+    queue_add_blocking(events_, &data_ready);
   }
 }
