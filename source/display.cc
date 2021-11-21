@@ -44,27 +44,38 @@ void Display::draw_signals(Buffer const &data) {
 
 void Display::draw_rate(uint32_t rate) {
 
-  uint x = 110;
+  uint x = 120;
   uint const y = 115;
 
-  draw_glyph(x, y, Font::char_as_bitmap('z'), rgb(0x10, 0x20, 0x1f));
-  x -= 5;
+  uint grouping = 0;
 
+  auto const move_position = [&grouping](uint x) {
+    ++grouping;
+    if (grouping >= 3) {
+      grouping = 0;
+      return x - 7;
+    }
+    return x - 5;
+  };
+
+  x = move_position(x);
+  draw_glyph(x, y, Font::char_as_bitmap('z'), rgb(0x10, 0x20, 0x1f));
+
+  x = move_position(x);
   draw_glyph(x, y, Font::char_as_bitmap('H'), rgb(0x10, 0x20, 0x1f));
-  x -= 6;
 
   do {
+    x = move_position(x);
     draw_glyph(x, y, Font::number_as_bitmap(rate % 10), 0xffff);
     rate /= 10;
-    x -= 5;
   } while (rate > 0);
 
-  while (x > 55) {
+  while (x > 60) {
+    x = move_position(x);
     lcd_.set_window(x, y, 4, 5);
     for (uint i = 0; i < 20; ++i) {
       lcd_.colorize_next_pixel(0x0000);
     }
-    x -= 5;
   }
 }
 
