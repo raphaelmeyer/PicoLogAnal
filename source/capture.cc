@@ -2,10 +2,8 @@
 
 #include "error.h"
 #include "events.h"
+#include "sampling.h"
 
-#include "sampling.pio.h"
-
-#include <hardware/clocks.h>
 #include <hardware/dma.h>
 #include <pico/multicore.h>
 
@@ -66,13 +64,9 @@ void PioProgram::main() {
 }
 
 void PioProgram::idle() {
-  auto const system_clock_hz = clock_get_hz(clk_sys);
+  Sampling sampling{config_};
 
-  auto const offset = pio_add_program(config_.pio, &sampling_program);
-  auto const sm = pio_claim_unused_sm(config_.pio, true);
-
-  auto sm_config = sampling_program_get_default_config(offset);
-  sampling_program_init(config_.pio, sm, &sm_config, config_.probe_base);
+  auto sm = sampling.initialize();
 
   auto dma_channel = dma_claim_unused_channel(true);
   auto dma_config = dma_channel_get_default_config(dma_channel);
@@ -84,19 +78,15 @@ void PioProgram::idle() {
     Trigger trigger{};
     queue_remove_blocking(trigger_queue_, &trigger);
 
-    auto const clock_div = system_clock_hz / trigger.sampling_rate_hz;
-
-    sm_config_set_clkdiv_int_frac(&sm_config, clock_div, 0);
-
-    pio_sm_init(config_.pio, sm, offset, &sm_config);
+    sampling.prepare(trigger.sampling_rate_hz);
 
     dma_channel_configure(dma_channel, &dma_config,
                           trigger.capture_buffer->data(), &config_.pio->rxf[sm],
                           trigger.capture_buffer->size(), true);
 
-    pio_sm_set_enabled(config_.pio, sm, true);
+    sampling.start();
     dma_channel_wait_for_finish_blocking(dma_channel);
-    pio_sm_set_enabled(config_.pio, sm, false);
+    sampling.stop();
 
     auto const data_ready = Event::DataReady;
     queue_add_blocking(events_, &data_ready);

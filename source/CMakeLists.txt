@@ -22,6 +22,7 @@ target_sources(picologanal PRIVATE
   error.cc
   font.cc
   pico_log_anal.cc
+  sampling.cc
   st7735.cc
   test_signal.cc
 )

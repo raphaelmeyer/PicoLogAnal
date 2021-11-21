@@ -8,18 +8,3 @@
     in pins, 2
 
 .wrap
-
-% c-sdk {
-
-void sampling_program_init(PIO pio, uint sm, pio_sm_config * config, uint base_pin) {
-  sm_config_set_in_pins(config, base_pin);
-  pio_sm_set_consecutive_pindirs(pio, sm, base_pin, 2, false);
-
-  pio_gpio_init(pio, base_pin);
-  pio_gpio_init(pio, base_pin + 1);
-
-  sm_config_set_in_shift(config, false, true, 2);
-  sm_config_set_fifo_join(config, PIO_FIFO_JOIN_RX);
-}
-
-%}
