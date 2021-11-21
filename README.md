@@ -1,5 +1,7 @@
 # Raspberry Pi Pico Logic Analyzer
 
+![Pico Logic Analyzer](/picologanal.png)
+
 ## Getting started
 
 - start vscode
