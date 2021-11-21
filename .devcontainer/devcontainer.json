@@ -6,6 +6,8 @@
   },
   "workspaceMount": "source=${localWorkspaceFolder}/source,target=/source,type=bind,consistency=cached",
   "workspaceFolder": "/source",
+  "containerUser": "vscode",
+  "updateRemoteUserUID": true,
   "extensions": [
     "ms-vscode.cmake-tools",
     "ms-vscode.cpptools",
